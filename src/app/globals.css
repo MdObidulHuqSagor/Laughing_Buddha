@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #170a0c;
+  --color-chili-50: #fdf3f3;
+  --color-chili-100: #fbe3e4;
+  --color-chili-500: #a11d2b;
+  --color-chili-600: #8a1622;
+  --color-chili-700: #6d101b;
+  --color-chili-900: #3b070e;
+  --color-gold-200: #f0dfae;
+  --color-gold-400: #d8b45c;
+  --color-gold-500: #c8a24a;
+  --color-gold-600: #a8853a;
+  --color-cream: #fbf6ee;
+  --font-display: "Playfair Display", "Georgia", "Times New Roman", serif;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html,
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.gold-rule {
+  background: linear-gradient(90deg, transparent, var(--color-gold-500), transparent);
+  height: 1px;
+}
+
+.thai-pattern {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(200, 162, 74, 0.14), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(161, 29, 43, 0.18), transparent 40%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-rise {
+  animation: rise 0.4s ease-out both;
+}
