@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { menuItems, orders, type OrderItem } from "@/db/schema";
+import { menuItems, orders, promoCodes, type OrderItem } from "@/db/schema";
 import { ensureSeeded } from "@/db/seed";
 import { getSession } from "@/lib/auth";
 import { getTable, listRecentOrders } from "@/lib/queries";
@@ -30,6 +30,9 @@ export async function POST(request: Request) {
     tableId?: string;
     items?: IncomingItem[];
     customerName?: string;
+    customerPhone?: string;
+    paymentMethod?: string;
+    promoCode?: string;
     note?: string;
   } | null;
 
@@ -76,7 +79,30 @@ export async function POST(request: Request) {
     };
   });
 
-  const total = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  let discount = 0;
+  const promoCode = body.promoCode?.trim().toUpperCase();
+  if (promoCode) {
+    const [promo] = await db.select().from(promoCodes).where(and(
+      eq(promoCodes.code, promoCode),
+      eq(promoCodes.isActive, true),
+      lte(promoCodes.minOrder, subtotal.toFixed(2)),
+      or(isNull(promoCodes.maxUses), sql`${promoCodes.usedCount} < ${promoCodes.maxUses}`),
+      or(isNull(promoCodes.startsAt), lte(promoCodes.startsAt, new Date())),
+      or(isNull(promoCodes.endsAt), gte(promoCodes.endsAt, new Date())),
+    )).limit(1);
+    if (promo) {
+      discount = promo.discountType === "fixed"
+        ? Math.min(subtotal, Number(promo.discountValue))
+        : Math.min(subtotal, subtotal * Number(promo.discountValue) / 100);
+      await db.update(promoCodes).set({ usedCount: promo.usedCount + 1 }).where(eq(promoCodes.id, promo.id));
+    }
+  }
+  const total = Math.max(0, subtotal - discount);
+  const paymentMethod =
+    body.paymentMethod && ["cash", "card", "mobile"].includes(body.paymentMethod)
+      ? body.paymentMethod
+      : "cash";
 
   const [created] = await db
     .insert(orders)
@@ -84,8 +110,12 @@ export async function POST(request: Request) {
       tableId: table.id,
       items: orderItems,
       totalPrice: total.toFixed(2),
+      discountAmount: discount.toFixed(2),
+      promoCode: discount > 0 ? promoCode : null,
       status: "pending",
       customerName: body.customerName?.trim().slice(0, 80) || null,
+      customerPhone: body.customerPhone?.trim().slice(0, 40) || null,
+      paymentMethod,
       note: body.note?.trim().slice(0, 300) || null,
     })
     .returning();

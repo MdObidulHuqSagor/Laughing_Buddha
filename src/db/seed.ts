@@ -193,9 +193,47 @@ const SEED_TABLES = [
   { tableNumber: 8, zone: "Private Room", seats: 8 },
 ];
 
+async function ensureOperationsSchema() {
+  await db.execute(sql.raw(`
+    create extension if not exists pgcrypto;
+    alter table if exists tables add column if not exists status text not null default 'available';
+    alter table if exists orders add column if not exists payment_method text not null default 'cash';
+    alter table if exists orders add column if not exists customer_phone text;
+    alter table if exists orders add column if not exists discount_amount numeric(10,2) not null default 0;
+    alter table if exists orders add column if not exists promo_code text;
+    alter table if exists orders add column if not exists tax_amount numeric(10,2) not null default 0;
+    alter table if exists orders add column if not exists service_charge_amount numeric(10,2) not null default 0;
+    alter table if exists admin_users add column if not exists role text not null default 'owner';
+    alter table if exists admin_users add column if not exists permissions jsonb not null default '[]'::jsonb;
+    create table if not exists promo_codes (
+      id uuid primary key default gen_random_uuid(), code text not null unique,
+      description text not null default '', discount_type text not null default 'percent',
+      discount_value numeric(10,2) not null, min_order numeric(10,2) not null default 0,
+      max_uses integer, used_count integer not null default 0, starts_at timestamptz,
+      ends_at timestamptz, is_active boolean not null default true, created_at timestamptz not null default now()
+    );
+    create table if not exists inventory_items (
+      id uuid primary key default gen_random_uuid(), name text not null,
+      unit text not null default 'pcs', quantity numeric(10,2) not null default 0,
+      low_stock_threshold numeric(10,2) not null default 5, updated_at timestamptz not null default now()
+    );
+    create table if not exists restaurant_settings (
+      id integer primary key default 1, address text not null default '', phone text not null default '',
+      tax_rate numeric(5,2) not null default 0, service_charge_rate numeric(5,2) not null default 0,
+      hours jsonb not null default '[]'::jsonb, updated_at timestamptz not null default now()
+    );
+    create table if not exists audit_logs (
+      id uuid primary key default gen_random_uuid(), user_id uuid references admin_users(id) on delete set null,
+      action text not null, entity text not null, entity_id text, detail text,
+      created_at timestamptz not null default now()
+    );
+  `));
+}
+
 let seedPromise: Promise<void> | null = null;
 
 async function runSeed(): Promise<void> {
+  await ensureOperationsSchema();
   // menu
   const existingMenu = await db.select({ id: menuItems.id }).from(menuItems).limit(1);
   if (existingMenu.length === 0) {

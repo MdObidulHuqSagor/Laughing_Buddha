@@ -8,6 +8,7 @@ const links = [
   { href: "/admin/menu", label: "Menu" },
   { href: "/admin/tables", label: "Tables & QR" },
   { href: "/admin/staff", label: "Staff" },
+  { href: "/admin/operations", label: "Operations" },
 ];
 
 export default function AdminNav({ email }: { email: string }) {

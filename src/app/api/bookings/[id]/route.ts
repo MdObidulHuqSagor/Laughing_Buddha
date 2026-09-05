@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { bookings } from "@/db/schema";
 import { getSession } from "@/lib/auth";
+import { recordAudit } from "@/lib/audit";
 import { BOOKING_STATUSES } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -27,5 +28,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     .returning();
 
   if (!updated) return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+  await recordAudit({ userId: session.userId, action: `booking_${status}`, entity: "booking", entityId: id });
   return NextResponse.json({ ok: true, status: updated.status });
 }

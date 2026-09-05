@@ -47,7 +47,9 @@ export default function TableOrderClient({
   const [noteFor, setNoteFor] = useState<string | null>(null);
   const cartRef = useRef<CartLine[]>([]);
 
-  cartRef.current = cart;
+  useEffect(() => {
+    cartRef.current = cart;
+  }, [cart]);
 
   /** Realtime-style menu sync: sold-out dishes vanish without a reload. */
   useEffect(() => {

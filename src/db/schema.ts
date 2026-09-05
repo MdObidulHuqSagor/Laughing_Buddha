@@ -38,6 +38,7 @@ export const restaurantTables = pgTable("tables", {
   zone: text("zone").default("Main Hall").notNull(),
   seats: integer("seats").default(4).notNull(),
   qrCodeUrl: text("qr_code_url"),
+  status: text("status").default("available").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -50,6 +51,14 @@ export const orders = pgTable("orders", {
   items: jsonb("items").$type<OrderItem[]>().notNull(),
   totalPrice: numeric("total_price", { precision: 10, scale: 2 }).notNull(),
   status: text("status").default("pending").notNull(),
+  paymentMethod: text("payment_method").default("cash").notNull(),
+  customerPhone: text("customer_phone"),
+  discountAmount: numeric("discount_amount", { precision: 10, scale: 2 }).default("0").notNull(),
+  promoCode: text("promo_code"),
+  taxAmount: numeric("tax_amount", { precision: 10, scale: 2 }).default("0").notNull(),
+  serviceChargeAmount: numeric("service_charge_amount", { precision: 10, scale: 2 })
+    .default("0")
+    .notNull(),
   customerName: text("customer_name"),
   note: text("note"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -75,6 +84,8 @@ export const adminUsers = pgTable("admin_users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   fullName: text("full_name").default("Owner").notNull(),
+  role: text("role").default("owner").notNull(),
+  permissions: jsonb("permissions").$type<string[]>().default([]).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -112,7 +123,57 @@ export const ownerNotifications = pgTable("owner_notifications", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const promoCodes = pgTable("promo_codes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  code: text("code").notNull().unique(),
+  description: text("description").default("").notNull(),
+  discountType: text("discount_type").default("percent").notNull(),
+  discountValue: numeric("discount_value", { precision: 10, scale: 2 }).notNull(),
+  minOrder: numeric("min_order", { precision: 10, scale: 2 }).default("0").notNull(),
+  maxUses: integer("max_uses"),
+  usedCount: integer("used_count").default(0).notNull(),
+  startsAt: timestamp("starts_at", { withTimezone: true }),
+  endsAt: timestamp("ends_at", { withTimezone: true }),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const inventoryItems = pgTable("inventory_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  name: text("name").notNull(),
+  unit: text("unit").default("pcs").notNull(),
+  quantity: numeric("quantity", { precision: 10, scale: 2 }).default("0").notNull(),
+  lowStockThreshold: numeric("low_stock_threshold", { precision: 10, scale: 2 })
+    .default("5")
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const restaurantSettings = pgTable("restaurant_settings", {
+  id: integer("id").primaryKey().default(1),
+  address: text("address").default("").notNull(),
+  phone: text("phone").default("").notNull(),
+  taxRate: numeric("tax_rate", { precision: 5, scale: 2 }).default("0").notNull(),
+  serviceChargeRate: numeric("service_charge_rate", { precision: 5, scale: 2 })
+    .default("0")
+    .notNull(),
+  hours: jsonb("hours").$type<{ days: string; time: string }[]>().default([]).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const auditLogs = pgTable("audit_logs", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => adminUsers.id, { onDelete: "set null" }),
+  action: text("action").notNull(),
+  entity: text("entity").notNull(),
+  entityId: text("entity_id"),
+  detail: text("detail"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type MenuItem = typeof menuItems.$inferSelect;
 export type RestaurantTable = typeof restaurantTables.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type Booking = typeof bookings.$inferSelect;
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InventoryItem = typeof inventoryItems.$inferSelect;

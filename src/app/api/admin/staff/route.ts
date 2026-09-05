@@ -3,6 +3,7 @@ import { asc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { adminSessions, adminUsers } from "@/db/schema";
 import { getSession, hashPassword } from "@/lib/auth";
+import { recordAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,8 @@ export type StaffDTO = {
   createdAt: string;
   activeSessions: number;
   isSelf: boolean;
+  role: string;
+  permissions: string[];
 };
 
 /** List every staff login that can reach the dashboard. */
@@ -26,6 +29,8 @@ export async function GET() {
       email: adminUsers.email,
       fullName: adminUsers.fullName,
       createdAt: adminUsers.createdAt,
+      role: adminUsers.role,
+      permissions: adminUsers.permissions,
       activeSessions: sql<number>`(
         select count(*)::int from ${adminSessions}
         where ${adminSessions.userId} = ${adminUsers.id}
@@ -42,6 +47,8 @@ export async function GET() {
     createdAt: row.createdAt.toISOString(),
     activeSessions: Number(row.activeSessions ?? 0),
     isSelf: row.id === session.userId,
+    role: row.role,
+    permissions: row.permissions ?? [],
   }));
 
   return NextResponse.json({ staff }, { headers: { "Cache-Control": "no-store" } });
@@ -56,6 +63,8 @@ export async function POST(request: Request) {
     email?: string;
     fullName?: string;
     password?: string;
+    role?: string;
+    permissions?: string[];
   } | null;
 
   const email = body?.email?.trim().toLowerCase();
@@ -86,13 +95,22 @@ export async function POST(request: Request) {
 
   const [created] = await db
     .insert(adminUsers)
-    .values({ email, fullName, passwordHash: hashPassword(password) })
+    .values({
+      email,
+      fullName,
+      passwordHash: hashPassword(password),
+      role: body?.role?.trim() || "staff",
+      permissions: Array.isArray(body?.permissions) ? body.permissions : ["orders"],
+    })
     .returning({
       id: adminUsers.id,
       email: adminUsers.email,
       fullName: adminUsers.fullName,
       createdAt: adminUsers.createdAt,
+      role: adminUsers.role,
+      permissions: adminUsers.permissions,
     });
+  await recordAudit({ userId: session.userId, action: "staff_created", entity: "staff", entityId: created.id, detail: created.email });
 
   return NextResponse.json({
     staff: {
@@ -100,6 +118,8 @@ export async function POST(request: Request) {
       createdAt: created.createdAt.toISOString(),
       activeSessions: 0,
       isSelf: false,
+      role: created.role,
+      permissions: created.permissions ?? [],
     } satisfies StaffDTO,
   });
 }

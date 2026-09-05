@@ -6,6 +6,25 @@
 
 create extension if not exists "pgcrypto";
 
+create table if not exists public.admin_users (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  password_hash text not null,
+  full_name text not null default 'Owner',
+  role text not null default 'owner',
+  permissions jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.admin_sessions (
+  token text primary key,
+  user_id uuid not null references public.admin_users(id) on delete cascade,
+  expires_at timestamptz not null,
+  created_at timestamptz not null default now()
+);
+alter table public.admin_users add column if not exists role text not null default 'owner';
+alter table public.admin_users add column if not exists permissions jsonb not null default '[]'::jsonb;
+
 -- ---------------------------------------------------------------------
 -- 1. Tables
 -- ---------------------------------------------------------------------
@@ -29,6 +48,8 @@ create table if not exists public.tables (
   zone         text        not null default 'Main Hall',
   seats        integer     not null default 4,
   qr_code_url  text,
+  status       text not null default 'available'
+                 check (status in ('available','occupied','reserved')),
   created_at   timestamptz not null default now()
 );
 
@@ -39,6 +60,12 @@ create table if not exists public.orders (
   total_price   numeric(10,2) not null check (total_price >= 0),
   status        text        not null default 'pending'
                   check (status in ('pending','preparing','served','paid')),
+  payment_method text not null default 'cash',
+  customer_phone text,
+  discount_amount numeric(10,2) not null default 0,
+  promo_code text,
+  tax_amount numeric(10,2) not null default 0,
+  service_charge_amount numeric(10,2) not null default 0,
   customer_name text,
   note          text,
   created_at    timestamptz not null default now(),
@@ -58,6 +85,58 @@ create table if not exists public.bookings (
   created_at      timestamptz not null default now()
 );
 
+alter table public.tables add column if not exists status text not null default 'available';
+alter table public.orders add column if not exists payment_method text not null default 'cash';
+alter table public.orders add column if not exists customer_phone text;
+alter table public.orders add column if not exists discount_amount numeric(10,2) not null default 0;
+alter table public.orders add column if not exists promo_code text;
+alter table public.orders add column if not exists tax_amount numeric(10,2) not null default 0;
+alter table public.orders add column if not exists service_charge_amount numeric(10,2) not null default 0;
+
+create table if not exists public.promo_codes (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  description text not null default '',
+  discount_type text not null default 'percent',
+  discount_value numeric(10,2) not null,
+  min_order numeric(10,2) not null default 0,
+  max_uses integer,
+  used_count integer not null default 0,
+  starts_at timestamptz,
+  ends_at timestamptz,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.inventory_items (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  unit text not null default 'pcs',
+  quantity numeric(10,2) not null default 0,
+  low_stock_threshold numeric(10,2) not null default 5,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.restaurant_settings (
+  id integer primary key default 1 check (id = 1),
+  address text not null default '',
+  phone text not null default '',
+  tax_rate numeric(5,2) not null default 0,
+  service_charge_rate numeric(5,2) not null default 0,
+  hours jsonb not null default '[]'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.admin_users(id) on delete set null,
+  action text not null,
+  entity text not null,
+  entity_id text,
+  detail text,
+  created_at timestamptz not null default now()
+);
+
 -- Optional audit log for owner alerts (email / Telegram / webhook)
 create table if not exists public.owner_notifications (
   id         uuid primary key default gen_random_uuid(),
@@ -74,6 +153,8 @@ create index if not exists menu_items_available_idx on public.menu_items (is_ava
 create index if not exists orders_created_at_idx on public.orders (created_at desc);
 create index if not exists orders_status_idx on public.orders (status);
 create index if not exists bookings_date_idx on public.bookings (date);
+create index if not exists audit_logs_created_at_idx on public.audit_logs (created_at desc);
+create index if not exists inventory_low_stock_idx on public.inventory_items (quantity);
 
 -- keep updated_at fresh
 create or replace function public.touch_updated_at()
@@ -102,6 +183,20 @@ alter table public.tables              enable row level security;
 alter table public.orders              enable row level security;
 alter table public.bookings            enable row level security;
 alter table public.owner_notifications enable row level security;
+alter table public.promo_codes enable row level security;
+alter table public.inventory_items enable row level security;
+alter table public.restaurant_settings enable row level security;
+alter table public.audit_logs enable row level security;
+
+-- These tables are accessed through the server-side admin session API.
+drop policy if exists "admin operations server access" on public.promo_codes;
+create policy "admin operations server access" on public.promo_codes for all to authenticated using (true) with check (true);
+drop policy if exists "inventory server access" on public.inventory_items;
+create policy "inventory server access" on public.inventory_items for all to authenticated using (true) with check (true);
+drop policy if exists "settings server access" on public.restaurant_settings;
+create policy "settings server access" on public.restaurant_settings for all to authenticated using (true) with check (true);
+drop policy if exists "audit server access" on public.audit_logs;
+create policy "audit server access" on public.audit_logs for select to authenticated using (true);
 
 -- menu_items: guests read only available dishes, staff do everything
 drop policy if exists "menu public read available" on public.menu_items;

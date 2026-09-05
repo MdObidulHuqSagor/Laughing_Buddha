@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -16,18 +15,11 @@ import type { PopularItem } from "@/lib/queries";
 const COLORS = ["#8a1622", "#a11d2b", "#b93342", "#c8a24a", "#d8b45c", "#6d101b", "#a8853a", "#3b070e"];
 
 export default function PopularChart({ data }: { data: PopularItem[] }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   const chartData = data.map((item) => ({
     name: item.name.length > 16 ? `${item.name.slice(0, 15)}…` : item.name,
     fullName: item.name,
     quantity: item.quantity,
   }));
-
-  if (!mounted) {
-    return <div className="h-72 animate-pulse rounded-2xl bg-black/5" />;
-  }
 
   if (chartData.length === 0) {
     return (

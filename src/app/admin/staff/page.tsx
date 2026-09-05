@@ -20,6 +20,8 @@ export default async function AdminStaffPage() {
       email: adminUsers.email,
       fullName: adminUsers.fullName,
       createdAt: adminUsers.createdAt,
+      role: adminUsers.role,
+      permissions: adminUsers.permissions,
       activeSessions: sql<number>`(
         select count(*)::int from ${adminSessions}
         where ${adminSessions.userId} = ${adminUsers.id}
@@ -36,6 +38,8 @@ export default async function AdminStaffPage() {
     createdAt: row.createdAt.toISOString(),
     activeSessions: Number(row.activeSessions ?? 0),
     isSelf: row.id === session.userId,
+    role: row.role,
+    permissions: row.permissions ?? [],
   }));
 
   return <StaffManager initialStaff={staff} currentEmail={session.email} />;

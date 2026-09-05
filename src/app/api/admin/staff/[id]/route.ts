@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { adminSessions, adminUsers } from "@/db/schema";
 import { getSession, hashPassword } from "@/lib/auth";
+import { recordAudit } from "@/lib/audit";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (patch.passwordHash) {
     await db.delete(adminSessions).where(eq(adminSessions.userId, id));
   }
+  await recordAudit({ userId: session.userId, action: patch.passwordHash ? "staff_password_reset" : "staff_updated", entity: "staff", entityId: id });
 
   return NextResponse.json({ ok: true, signedOut: Boolean(patch.passwordHash) });
 }
@@ -86,5 +88,6 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     .returning({ id: adminUsers.id });
 
   if (!deleted) return NextResponse.json({ error: "Staff member not found." }, { status: 404 });
+  await recordAudit({ userId: session.userId, action: "staff_removed", entity: "staff", entityId: id });
   return NextResponse.json({ ok: true });
 }

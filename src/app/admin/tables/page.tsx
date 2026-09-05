@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import QRCode from "qrcode";
 import PrintButton from "@/components/admin/PrintButton";
+import TableManager from "@/components/admin/TableManager";
 import { LogoLockup } from "@/components/Logo";
 import { ensureSeeded } from "@/db/seed";
 import { requireAdmin } from "@/lib/auth";
@@ -46,6 +47,8 @@ export default async function AdminTablesPage() {
         <PrintButton />
       </div>
 
+      <TableManager />
+
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map(({ table, url, qr }) => (
           <article
@@ -61,15 +64,33 @@ export default async function AdminTablesPage() {
             <p className="text-xs text-ink/50">
               {table.zone} · {table.seats} seats
             </p>
+            <span className={`mt-2 inline-block rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${
+              table.status === "occupied"
+                ? "bg-red-100 text-red-700"
+                : table.status === "reserved"
+                  ? "bg-amber-100 text-amber-800"
+                  : "bg-emerald-100 text-emerald-800"
+            }`}>
+              {table.status}
+            </span>
             <img src={qr} alt={`QR for table ${table.tableNumber}`} className="mx-auto mt-3 w-40" />
             <p className="mt-2 text-[10px] break-all text-ink/40">{url}</p>
-            <Link
-              href={`/table/${table.id}`}
-              target="_blank"
-              className="mt-3 inline-block rounded-full border border-chili-600/25 px-4 py-1.5 text-[11px] font-semibold text-chili-700 hover:bg-chili-50"
-            >
-              Open ordering screen
-            </Link>
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+              <a
+                href={qr}
+                download={`laughing-buddha-table-${table.tableNumber}-qr.png`}
+                className="rounded-full bg-chili-600 px-4 py-1.5 text-[11px] font-semibold text-cream hover:bg-chili-500"
+              >
+                Download QR
+              </a>
+              <Link
+                href={`/table/${table.id}`}
+                target="_blank"
+                className="rounded-full border border-chili-600/25 px-4 py-1.5 text-[11px] font-semibold text-chili-700 hover:bg-chili-50"
+              >
+                Open ordering screen
+              </Link>
+            </div>
           </article>
         ))}
       </div>

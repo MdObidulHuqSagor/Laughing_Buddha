@@ -1,8 +1,180 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;
-  }
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="fe2b482f-90fc-4d54-885b-a800b24d1fc3" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/public/images/hero.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/images/logo-mark.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/images/logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/drizzle.config.json" beforeDir="false" afterPath="$PROJECT_DIR$/drizzle.config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/admin/staff/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/admin/staff/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/admin/tables/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/admin/tables/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/staff/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/staff/[id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/admin/staff/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/admin/staff/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/bookings/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/bookings/[id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/orders/[id]/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/orders/[id]/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/api/orders/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/api/orders/route.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/AdminNav.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/AdminNav.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/PopularChart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/PopularChart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/StaffManager.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/StaffManager.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/table/TableOrderClient.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/table/TableOrderClient.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/schema.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/schema.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/seed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/seed.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/queries.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/queries.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supabase/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/supabase/schema.sql" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="66" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0003156597439258" />
+      <entry key="MS500" value="1.5931433412556344" />
+      <entry key="S2" value="4.194663494878103" />
+      <entry key="S5" value="8.99586282214835" />
+      <entry key="S10" value="18.476134111582354" />
+      <entry key="S30" value="41.19265557520642" />
+      <entry key="S60" value="52.83436817732574" />
+      <entry key="M2" value="61.28161826102629" />
+      <entry key="M5" value="80.43268590816838" />
+      <entry key="M10" value="110.6201618900444" />
+      <entry key="M15" value="132.18126177497186" />
+      <entry key="M30" value="166.6070804485755" />
+      <entry key="H1" value="191.50958562842968" />
+      <entry key="H2" value="206.6541563633719" />
+      <entry key="H4" value="215.02993311664824" />
+      <entry key="D1" value="222.46169409787248" />
+      <entry key="W1" value="223.7791541882966" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="0.0" />
+      <entry key="M5" value="0.0" />
+      <entry key="M10" value="0.0" />
+      <entry key="M15" value="0.0" />
+      <entry key="M30" value="0.0" />
+      <entry key="H1" value="0.0" />
+      <entry key="H2" value="0.0" />
+      <entry key="H4" value="0.0" />
+      <entry key="D1" value="0.0" />
+      <entry key="W1" value="0.0" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="0.9398244844171912" />
+      <entry key="MS500" value="1.5741125297800485" />
+      <entry key="S2" value="4.1822217455553" />
+      <entry key="S5" value="8.985466857745923" />
+      <entry key="S10" value="18.465904149221835" />
+      <entry key="S30" value="41.185365775440175" />
+      <entry key="S60" value="52.82974124691542" />
+      <entry key="M2" value="61.27894698010781" />
+      <entry key="M5" value="80.43126251795208" />
+      <entry key="M10" value="110.61908883970243" />
+      <entry key="M15" value="132.18033340105612" />
+      <entry key="M30" value="166.6064178034565" />
+      <entry key="H1" value="191.5091737542619" />
+      <entry key="H2" value="206.65392443701927" />
+      <entry key="H4" value="215.02980974923727" />
+      <entry key="D1" value="222.46167242145063" />
+      <entry key="W1" value="223.7791510631495" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8,
+  &quot;fromUser&quot;: false
 }</component>
+  <component name="ProjectId" id="3IguoRrbEWImPEtFe5gc7o0zYoA" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "CidrDebugProfileConversion": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "js.debugger.nextJs.config.created.client": "true",
+    "js.debugger.nextJs.config.created.server": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/md.obidulhuqsagor/Downloads/Laughing_Buddha",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "settings.sync",
+    "ts.external.directory.path": "/Users/md.obidulhuqsagor/Downloads/Laughing_Buddha/node_modules/typescript/lib"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/public/images" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.Next.js: server-side">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-34e2839f716b-intellij.indexing.shared.core-IU-262.9437.185" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="fe2b482f-90fc-4d54-885b-a800b24d1fc3" name="Changes" comment="" />
+      <created>1788198706950</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1788198706950</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
 </project>

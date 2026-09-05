@@ -2,9 +2,13 @@ import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   bookings,
+  auditLogs,
+  inventoryItems,
   menuItems,
   orders,
   ownerNotifications,
+  promoCodes,
+  restaurantSettings,
   restaurantTables,
   type OrderItem,
 } from "@/db/schema";
@@ -30,6 +34,11 @@ export type OrderDTO = {
   status: string;
   customerName: string | null;
   note: string | null;
+  paymentMethod: string;
+  customerPhone: string | null;
+  discountAmount: number;
+  taxAmount: number;
+  serviceChargeAmount: number;
   createdAt: string;
 };
 
@@ -104,6 +113,11 @@ export function toOrderDTO(
     status: row.status,
     customerName: row.customerName,
     note: row.note,
+    paymentMethod: row.paymentMethod,
+    customerPhone: row.customerPhone,
+    discountAmount: Number(row.discountAmount ?? 0),
+    taxAmount: Number(row.taxAmount ?? 0),
+    serviceChargeAmount: Number(row.serviceChargeAmount ?? 0),
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -162,6 +176,87 @@ export type DashboardStats = {
   todayGuests: number;
   popular: PopularItem[];
 };
+
+export type SalesReportRow = {
+  period: string;
+  orders: number;
+  sales: number;
+  averageOrder: number;
+  cash: number;
+  card: number;
+  mobile: number;
+};
+
+export async function getSalesReport(range: "daily" | "weekly" | "monthly" = "daily") {
+  const days = range === "monthly" ? 30 : range === "weekly" ? 7 : 1;
+  const since = new Date(Date.now() - days * 86400000);
+  const result = await db.execute<{
+    period: string;
+    orders: number;
+    sales: string;
+    average_order: string;
+    cash: string;
+    card: string;
+    mobile: string;
+  }>(sql`
+    select to_char(date_trunc(${range === "daily" ? "hour" : "day"}, created_at), 'YYYY-MM-DD HH24:00') as period,
+      count(*)::int as orders,
+      coalesce(sum(total_price), 0) as sales,
+      coalesce(avg(total_price), 0) as average_order,
+      coalesce(sum(case when payment_method = 'cash' then total_price else 0 end), 0) as cash,
+      coalesce(sum(case when payment_method = 'card' then total_price else 0 end), 0) as card,
+      coalesce(sum(case when payment_method not in ('cash','card') then total_price else 0 end), 0) as mobile
+    from orders
+    where status = 'paid' and created_at >= ${since.toISOString()}
+    group by 1 order by 1
+  `);
+  return result.rows.map((row) => ({
+    period: row.period,
+    orders: Number(row.orders),
+    sales: Number(row.sales),
+    averageOrder: Number(row.average_order),
+    cash: Number(row.cash),
+    card: Number(row.card),
+    mobile: Number(row.mobile),
+  }));
+}
+
+export async function listCustomerHistory(search?: string) {
+  const pattern = search?.trim();
+  const result = await db.execute<{
+    customer_name: string | null;
+    customer_phone: string | null;
+    orders: number;
+    total: string;
+    last_order: Date;
+  }>(sql`
+    select customer_name, customer_phone, count(*)::int as orders,
+      coalesce(sum(total_price), 0) as total, max(created_at) as last_order
+    from orders
+    where status = 'paid'
+      ${pattern ? sql`and (customer_name ilike ${`%${pattern}%`} or customer_phone ilike ${`%${pattern}%`})` : sql``}
+    group by customer_name, customer_phone
+    order by last_order desc limit 100
+  `);
+  return result.rows.map((row) => ({
+    name: row.customer_name ?? "Walk-in",
+    phone: row.customer_phone ?? "",
+    orders: Number(row.orders),
+    total: Number(row.total),
+    lastOrder: new Date(row.last_order).toISOString(),
+  }));
+}
+
+export async function getAdminOperationsData() {
+  const [tables, inventory, promos, settings, logs] = await Promise.all([
+    db.select().from(restaurantTables).orderBy(restaurantTables.tableNumber),
+    db.select().from(inventoryItems).orderBy(inventoryItems.name),
+    db.select().from(promoCodes).orderBy(desc(promoCodes.createdAt)),
+    db.select().from(restaurantSettings).limit(1),
+    db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt)).limit(50),
+  ]);
+  return { tables, inventory, promos, settings: settings[0] ?? null, logs };
+}
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const startOfToday = new Date();

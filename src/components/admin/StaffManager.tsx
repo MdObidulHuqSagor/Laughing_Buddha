@@ -25,7 +25,7 @@ export default function StaffManager({
   const [resetFor, setResetFor] = useState<StaffDTO | null>(null);
   const [deleting, setDeleting] = useState<StaffDTO | null>(null);
 
-  const [form, setForm] = useState({ fullName: "", email: "", password: randomPassword() });
+  const [form, setForm] = useState({ fullName: "", email: "", password: randomPassword(), role: "staff", permissions: "orders" });
 
   useEffect(() => {
     if (!toast) return;
@@ -48,7 +48,10 @@ export default function StaffManager({
     const res = await fetch("/api/admin/staff", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({
+        ...form,
+        permissions: form.permissions.split(",").map((permission) => permission.trim()).filter(Boolean),
+      }),
     });
     const data = (await res.json()) as { error?: string };
     setBusy(null);
@@ -59,7 +62,7 @@ export default function StaffManager({
     setToast(
       `Login created for ${form.email}. Share this password with them now — it is not shown again: ${form.password}`,
     );
-    setForm({ fullName: "", email: "", password: randomPassword() });
+    setForm({ fullName: "", email: "", password: randomPassword(), role: "staff", permissions: "orders" });
     setAdding(false);
     await refresh();
   }
@@ -147,7 +150,7 @@ export default function StaffManager({
             password.
           </p>
 
-          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+          <div className="mt-5 grid gap-4 sm:grid-cols-5">
             <label className="block">
               <span className="text-[11px] font-semibold tracking-wider text-ink/60 uppercase">
                 Full name
@@ -159,6 +162,18 @@ export default function StaffManager({
                 placeholder="Rifat Hasan — Floor manager"
                 className="mt-1.5 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-sm focus:border-chili-500 focus:outline-none"
               />
+            </label>
+            <label className="block">
+              <span className="text-[11px] font-semibold tracking-wider text-ink/60 uppercase">Permissions</span>
+              <input value={form.permissions} onChange={(event) => setForm({ ...form, permissions: event.target.value })} placeholder="orders,menu,reports" className="mt-1.5 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-sm" />
+            </label>
+            <label className="block">
+              <span className="text-[11px] font-semibold tracking-wider text-ink/60 uppercase">Role</span>
+              <select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })} className="mt-1.5 w-full rounded-xl border border-black/10 px-3.5 py-2.5 text-sm">
+                <option value="staff">Staff</option>
+                <option value="manager">Manager</option>
+                <option value="kitchen">Kitchen</option>
+              </select>
             </label>
             <label className="block">
               <span className="text-[11px] font-semibold tracking-wider text-ink/60 uppercase">
@@ -221,6 +236,7 @@ export default function StaffManager({
             <tr>
               <th className="px-4 py-3">Staff member</th>
               <th className="px-4 py-3">Email</th>
+              <th className="px-4 py-3">Role</th>
               <th className="px-4 py-3">Added</th>
               <th className="px-4 py-3">Signed in</th>
               <th className="px-4 py-3 text-right">Actions</th>
@@ -239,10 +255,12 @@ export default function StaffManager({
                       {member.email === currentEmail && (
                         <span className="text-[11px] text-emerald-700">that&apos;s you</span>
                       )}
+                      <span className="block text-[10px] text-ink/40">{member.permissions.join(", ") || "no permissions"}</span>
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-3 font-mono text-xs text-ink/70">{member.email}</td>
+                <td className="px-4 py-3 text-xs font-semibold capitalize text-chili-700">{member.role}</td>
                 <td className="px-4 py-3 text-xs text-ink/55">
                   {new Date(member.createdAt).toLocaleDateString("en-GB", {
                     day: "numeric",
